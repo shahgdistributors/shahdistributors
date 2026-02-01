@@ -6,10 +6,12 @@ const toRole = (value?: string) => {
   return "Admin"
 }
 
-const supabaseSignIn = async (email: string, password: string) => {
+type LoginResult = { success: boolean; error?: string }
+
+const supabaseSignIn = async (email: string, password: string): Promise<LoginResult> => {
   const supabase = createSupabaseBrowserClient()
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-  if (error || !data.user) return false
+  if (error || !data.user) return { success: false, error: error?.message || "Unable to sign in" }
 
   storage.setCurrentUser({
     id: data.user.id,
@@ -19,10 +21,10 @@ const supabaseSignIn = async (email: string, password: string) => {
     role: toRole(data.user.user_metadata?.role),
     createdAt: new Date().toISOString(),
   })
-  return true
+  return { success: true }
 }
 
-export async function login(username: string, password: string): Promise<boolean> {
+export async function login(username: string, password: string): Promise<LoginResult> {
   if (username.includes("@")) {
     return supabaseSignIn(username, password)
   }
@@ -30,10 +32,10 @@ export async function login(username: string, password: string): Promise<boolean
   const user = storage.getUserByUsername(username)
   if (user && user.password === password) {
     storage.setCurrentUser(user)
-    return true
+    return { success: true }
   }
 
-  return false
+  return { success: false, error: "Invalid username or password" }
 }
 
 export function logout(): void {

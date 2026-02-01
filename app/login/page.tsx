@@ -20,7 +20,22 @@ export default function LoginPage() {
 
   useEffect(() => {
     initializeTheme()
-    void fetch("/api/auth/seed-admin", { method: "POST" }).catch(() => {})
+    const seedAdmin = async () => {
+      try {
+        const response = await fetch("/api/auth/seed-admin", { method: "POST" })
+        if (!response.ok) {
+          setError("Unable to initialize admin account.")
+          return
+        }
+        const result = await response.json()
+        if (!result?.ok) {
+          setError(result?.error || "Unable to initialize admin account.")
+        }
+      } catch {
+        setError("Unable to initialize admin account.")
+      }
+    }
+    void seedAdmin()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,12 +44,12 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const success = await login(username, password)
+      const result = await login(username, password)
 
-      if (success) {
+      if (result.success) {
         router.push("/dashboard")
       } else {
-        setError("Invalid username or password")
+        setError(result.error || "Invalid username or password")
       }
     } catch (err) {
       setError("An error occurred. Please try again.")
