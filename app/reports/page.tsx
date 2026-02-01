@@ -7,6 +7,7 @@ import { storage } from "@/lib/storage"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { TrendingUp, Package, Users, ShoppingCart } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { formatPKR } from "@/lib/utils"
 
 export default function ReportsPage() {
   const [timeRange, setTimeRange] = useState("all")
@@ -126,9 +127,9 @@ export default function ReportsPage() {
               <TrendingUp className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₹{reports.summary.totalRevenue.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{formatPKR(reports.summary.totalRevenue)}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Avg: ₹{reports.summary.avgOrderValue.toFixed(0)} per order
+                Avg: {formatPKR(reports.summary.avgOrderValue)} per order
               </p>
             </CardContent>
           </Card>
@@ -193,9 +194,7 @@ export default function ReportsPage() {
                         <TableRow key={product.id}>
                           <TableCell className="font-medium">{product.name}</TableCell>
                           <TableCell className="text-right">{product.quantity}</TableCell>
-                          <TableCell className="text-right font-semibold">
-                            ₹{product.revenue.toLocaleString()}
-                          </TableCell>
+                          <TableCell className="text-right font-semibold">{formatPKR(product.revenue)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -230,7 +229,7 @@ export default function ReportsPage() {
                         <TableRow key={dist.id}>
                           <TableCell className="font-medium">{dist.name}</TableCell>
                           <TableCell className="text-right">{dist.orders}</TableCell>
-                          <TableCell className="text-right font-semibold">₹{dist.revenue.toLocaleString()}</TableCell>
+                          <TableCell className="text-right font-semibold">{formatPKR(dist.revenue)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -267,7 +266,7 @@ export default function ReportsPage() {
                       <TableRow key={product.id}>
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell className="text-right">{product.quantity}</TableCell>
-                        <TableCell className="text-right font-semibold">₹{product.revenue.toLocaleString()}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatPKR(product.revenue)}</TableCell>
                         <TableCell className="text-right">
                           {((product.revenue / reports.summary.totalRevenue) * 100).toFixed(1)}%
                         </TableCell>
@@ -306,9 +305,9 @@ export default function ReportsPage() {
                       <TableRow key={dist.id}>
                         <TableCell className="font-medium">{dist.name}</TableCell>
                         <TableCell className="text-right">{dist.orders}</TableCell>
-                        <TableCell className="text-right font-semibold">₹{dist.revenue.toLocaleString()}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatPKR(dist.revenue)}</TableCell>
                         <TableCell className="text-right">
-                          ₹{dist.orders > 0 ? (dist.revenue / dist.orders).toFixed(0) : 0}
+                          {formatPKR(dist.orders > 0 ? dist.revenue / dist.orders : 0)}
                         </TableCell>
                       </TableRow>
                     ))}

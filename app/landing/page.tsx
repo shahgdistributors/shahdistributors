@@ -4,7 +4,18 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { MessageCircle, Wheat, Droplet, ArrowRight, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
+
+const LOGO_SRC = '/images/9515d28e-1e5d-43a0-b693-b831d02b83eb-removalai-preview.png'
+
+const WhatsAppIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" className={className} aria-hidden="true" focusable="false">
+    <path
+      fill="currentColor"
+      d="M12.04 2.01C6.58 2.01 2.12 6.47 2.12 11.93c0 1.94.51 3.83 1.48 5.5L2 22l4.7-1.54a9.9 9.9 0 0 0 5.34 1.53h.01c5.46 0 9.92-4.46 9.92-9.92 0-2.65-1.03-5.14-2.9-7.02a9.86 9.86 0 0 0-7.03-3.04ZM12.04 20.1h-.01a8.23 8.23 0 0 1-4.2-1.15l-.3-.18-2.79.91.91-2.72-.19-.28a8.2 8.2 0 0 1-1.3-4.48 8.3 8.3 0 0 1 8.28-8.29c2.2 0 4.27.85 5.83 2.42a8.25 8.25 0 0 1 2.42 5.87 8.3 8.3 0 0 1-8.28 8.9Zm4.58-6.14c-.25-.13-1.46-.72-1.69-.8-.23-.08-.4-.12-.57.13-.17.25-.65.8-.8.97-.15.17-.3.19-.55.06-.25-.13-1.05-.39-2-1.24-.74-.66-1.24-1.48-1.39-1.73-.15-.25-.02-.38.11-.5.12-.12.25-.3.38-.45.13-.15.17-.25.25-.42.08-.17.04-.32-.02-.45-.06-.13-.57-1.37-.78-1.88-.2-.48-.4-.42-.57-.42h-.49c-.17 0-.45.06-.68.32-.23.25-.9.88-.9 2.14 0 1.26.92 2.48 1.05 2.65.13.17 1.8 2.74 4.36 3.84.61.26 1.09.42 1.46.54.61.19 1.16.16 1.59.1.48-.07 1.46-.6 1.67-1.18.2-.58.2-1.08.14-1.18-.06-.1-.22-.16-.47-.29Z"
+    />
+  </svg>
+)
 
 export default function LandingPage() {
   const [scrollY, setScrollY] = useState(0)
@@ -26,7 +37,7 @@ export default function LandingPage() {
         <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/logo-light.png"
+              src={LOGO_SRC}
               alt="Shah Distributors"
               width={240}
               height={60}
@@ -43,9 +54,9 @@ export default function LandingPage() {
             href="https://wa.me/923353535039"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2"
+            className="bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2"
           >
-            <MessageCircle className="w-4 h-4" />
+            <WhatsAppIcon className="w-4 h-4" />
             WhatsApp
           </a>
         </nav>
@@ -96,18 +107,11 @@ export default function LandingPage() {
                 href="https://wa.me/923353535039"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 px-8 py-4 rounded-lg font-bold flex items-center justify-center gap-2 transition hover:shadow-lg hover:shadow-amber-500/20"
+                className="bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 px-8 py-4 rounded-lg font-bold flex items-center justify-center gap-2 transition hover:shadow-lg hover:shadow-green-500/25"
               >
-                <MessageCircle className="w-5 h-5" />
+                <WhatsAppIcon className="w-5 h-5" />
                 Chat on WhatsApp
               </a>
-              <Link
-                href="/login"
-                className="border border-amber-500/30 hover:border-amber-500/60 px-8 py-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition hover:bg-amber-500/5"
-              >
-                Access Dashboard
-                <ArrowRight className="w-5 h-5" />
-              </Link>
             </div>
           </div>
 
@@ -264,9 +268,9 @@ export default function LandingPage() {
             href="https://wa.me/923353535039"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-lg font-bold items-center justify-center gap-2 transition hover:shadow-lg hover:shadow-green-500/25 mx-auto"
+            className="inline-flex bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 px-8 py-4 rounded-lg font-bold items-center justify-center gap-2 transition hover:shadow-lg hover:shadow-green-500/25 mx-auto"
           >
-            <MessageCircle className="w-5 h-5" />
+            <WhatsAppIcon className="w-5 h-5" />
             Start Conversation
           </a>
         </div>
@@ -278,7 +282,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-12 mb-12">
             <div>
             <Image
-              src="/logo-light.png"
+              src={LOGO_SRC}
               alt="Shah Distributors"
               width={210}
               height={60}

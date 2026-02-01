@@ -57,7 +57,7 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="flex items-center">
             <Image
-              src="/logo-light.png"
+              src="/images/9515d28e-1e5d-43a0-b693-b831d02b83eb-removalai-preview.png"
               alt="Shah Distributors"
               width={210}
               height={60}

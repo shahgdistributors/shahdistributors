@@ -64,19 +64,11 @@ export default function LoginPage() {
         <CardHeader className="space-y-4 text-center pb-8">
           <div className="mx-auto flex items-center justify-center">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/4e15fe26-28f8-47f3-bf02-4a7579e702fc_removalai_preview-ZyIqIXlyHjuvkpjOQSxjAX1UbEnDIW.png"
-              alt="Shah Distributors"
-              width={200}
-              height={80}
-              className="dark:hidden"
-              priority
-            />
-            <Image
               src="/images/9515d28e-1e5d-43a0-b693-b831d02b83eb-removalai-preview.png"
               alt="Shah Distributors"
               width={200}
               height={80}
-              className="hidden dark:block"
+              className="object-contain"
               priority
             />
           </div>
