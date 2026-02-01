@@ -14,6 +14,7 @@ import {
   exportAllDataToExcel,
   importProductsFromExcel,
   importDistributorsFromExcel,
+  importCustomersFromExcel,
 } from "@/lib/excel-utils"
 import { useToast } from "@/hooks/use-toast"
 
@@ -153,6 +154,49 @@ export function ExcelImportExport() {
     }
   }
 
+  const handleImportCustomers = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setImporting(true)
+    try {
+      const customers = await importCustomersFromExcel(file)
+      let imported = 0
+
+      customers.forEach((customer) => {
+        if (customer.name && customer.phone) {
+          storage.createCustomer({
+            id: Date.now().toString() + Math.random(),
+            name: customer.name,
+            phone: customer.phone,
+            email: customer.email || "",
+            address: customer.address || "",
+            city: customer.city || "",
+            outstandingBalance: customer.outstandingBalance || 0,
+            totalPurchases: customer.totalPurchases || 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          })
+          imported++
+        }
+      })
+
+      toast({
+        title: "Import Successful",
+        description: `${imported} customers imported from Excel`,
+      })
+    } catch (error) {
+      toast({
+        title: "Import Failed",
+        description: "Error reading Excel file. Please check the format.",
+        variant: "destructive",
+      })
+    } finally {
+      setImporting(false)
+      e.target.value = ""
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Export Section */}
@@ -195,7 +239,7 @@ export function ExcelImportExport() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <input
                 type="file"
@@ -228,6 +272,24 @@ export function ExcelImportExport() {
                   <span>
                     <Upload className="w-4 h-4" />
                     Import Distributors
+                  </span>
+                </Button>
+              </label>
+            </div>
+            <div>
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleImportCustomers}
+                disabled={importing}
+                className="hidden"
+                id="import-customers"
+              />
+              <label htmlFor="import-customers">
+                <Button variant="outline" className="gap-2 w-full bg-transparent" disabled={importing} asChild>
+                  <span>
+                    <Upload className="w-4 h-4" />
+                    Import Customers
                   </span>
                 </Button>
               </label>

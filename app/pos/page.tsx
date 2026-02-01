@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Search, Minus, Plus, Trash2, Printer, CreditCard, Banknote } from "lucide-react"
-import { getProducts, type Product, storage, type Customer } from "@/lib/storage"
+import { getProducts, type Product, storage, type Customer, type ReceiptRecord } from "@/lib/storage"
 import { getCurrentUser } from "@/lib/auth"
 import { formatPKR, formatPKRWithDecimals } from "@/lib/utils"
 import type { OrderItem, POSTransaction } from "@/lib/storage"
@@ -36,6 +36,12 @@ export default function POSPage() {
     loadCustomers()
   }, [])
 
+  useEffect(() => {
+    const handleFocus = () => loadCustomers()
+    window.addEventListener("focus", handleFocus)
+    return () => window.removeEventListener("focus", handleFocus)
+  }, [])
+
   const loadProducts = () => {
     setProducts(getProducts())
     setFilteredProducts(getProducts())
@@ -53,8 +59,104 @@ export default function POSPage() {
     }
   }
 
+  const buildReceiptHtml = (transaction: POSTransaction) => {
+    const rows = transaction.items
+      .map((item) => {
+        const product = products.find((p) => p.id === item.productId)
+        return `
+          <tr>
+            <td>${product?.name || "Unknown"}</td>
+            <td style="text-align:center;">${item.quantity}</td>
+            <td style="text-align:right;">${formatPKR(item.price)}</td>
+            <td style="text-align:right;font-weight:600;">${formatPKR(item.total)}</td>
+          </tr>
+        `
+      })
+      .join("")
+
+    return `
+      <html>
+        <head>
+          <title>Receipt ${transaction.receiptNumber}</title>
+          <style>
+            body { font-family: Arial, sans-serif; color: #111; margin: 0; padding: 24px; }
+            h1, h2, h3, p { margin: 0; }
+            table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+            th, td { padding: 6px 0; border-bottom: 1px dashed #ccc; font-size: 12px; }
+            .summary { margin-top: 12px; font-size: 13px; }
+            .summary-row { display: flex; justify-content: space-between; margin: 4px 0; }
+            .total { font-weight: 700; border-top: 1px solid #111; padding-top: 6px; }
+          </style>
+        </head>
+        <body>
+          <div style="text-align:center;">
+            <h2>Shah Distributors</h2>
+            <p style="font-size:12px;color:#666;">Distribution Management System</p>
+            <p style="font-size:11px;color:#888;margin-top:4px;">Thank you for your business!</p>
+          </div>
+          <div style="margin:12px 0;border-top:1px dashed #888;border-bottom:1px dashed #888;padding:8px 0;font-size:12px;">
+            <div style="display:flex;justify-content:space-between;">
+              <span>Receipt #:</span>
+              <span style="font-family:monospace;font-weight:600;">${transaction.receiptNumber}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span>Date:</span>
+              <span>${new Date(transaction.createdAt).toLocaleString()}</span>
+            </div>
+            ${transaction.customerName ? `<div style="display:flex;justify-content:space-between;"><span>Customer:</span><span>${transaction.customerName}</span></div>` : ""}
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align:left;">Item</th>
+                <th style="text-align:center;">Qty</th>
+                <th style="text-align:right;">Price</th>
+                <th style="text-align:right;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+          <div class="summary">
+            <div class="summary-row"><span>Subtotal:</span><span>${formatPKRWithDecimals(transaction.subtotal)}</span></div>
+            <div class="summary-row"><span>Tax (18% GST):</span><span>${formatPKRWithDecimals(transaction.taxAmount)}</span></div>
+            <div class="summary-row total"><span>Total:</span><span>${formatPKRWithDecimals(transaction.totalAmount)}</span></div>
+            <div class="summary-row"><span>Payment (${transaction.paymentMethod}):</span><span>${formatPKRWithDecimals(transaction.amountReceived)}</span></div>
+            ${transaction.change > 0 ? `<div class="summary-row"><span>Change:</span><span>${formatPKRWithDecimals(transaction.change)}</span></div>` : ""}
+          </div>
+          <div style="text-align:center;margin-top:12px;border-top:1px dashed #888;padding-top:8px;font-size:11px;color:#666;">
+            Thank you for shopping with us! Please visit again.
+          </div>
+        </body>
+      </html>
+    `
+  }
+
+  const downloadReceipt = (transaction: POSTransaction, html: string) => {
+    const date = new Date(transaction.createdAt).toISOString().split("T")[0]
+    const fileName = `Receipt_${date}_${transaction.receiptNumber}.html`
+    const blob = new Blob([html], { type: "text/html" })
+    const link = document.createElement("a")
+    link.href = URL.createObjectURL(blob)
+    link.download = fileName
+    link.click()
+    URL.revokeObjectURL(link.href)
+  }
+
   const handlePrint = () => {
-    window.print()
+    if (!lastTransaction) return
+    const html = buildReceiptHtml(lastTransaction)
+    const printWindow = window.open("", "_blank", "width=900,height=700")
+    if (!printWindow) return
+    printWindow.document.open()
+    printWindow.document.write(html)
+    printWindow.document.close()
+    printWindow.focus()
+    printWindow.onload = () => {
+      printWindow.print()
+      printWindow.close()
+    }
   }
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,6 +264,18 @@ export default function POSPage() {
     // Save transaction to storage
     storage.createPOSTransaction(transaction)
 
+    const receiptHtml = buildReceiptHtml(transaction)
+    const receiptRecord: ReceiptRecord = {
+      id: `${Date.now()}-${Math.random()}`,
+      receiptNumber,
+      transactionId: transaction.id,
+      customerName: customerName || undefined,
+      createdAt: transaction.createdAt,
+      html: receiptHtml,
+    }
+    storage.createReceipt(receiptRecord)
+    downloadReceipt(transaction, receiptHtml)
+
     // Update product stock and create inventory transactions
     cart.forEach((item) => {
       const product = products.find((p) => p.id === item.productId)
@@ -206,13 +320,19 @@ export default function POSPage() {
       <DashboardLayout>
         <div className="p-6">
           <div className="max-w-4xl mx-auto">
-            <div className="flex justify-between items-center mb-6 print:hidden">
+              <div className="flex justify-between items-center mb-6 print:hidden">
               <h1 className="text-2xl font-bold">Transaction Complete</h1>
               <div className="flex gap-2">
                 <Button onClick={handlePrint} className="gap-2">
                   <Printer className="w-4 h-4" />
                   Print Receipt
                 </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => downloadReceipt(lastTransaction, buildReceiptHtml(lastTransaction))}
+                  >
+                    Download Receipt
+                  </Button>
                 <Button variant="outline" onClick={resetPOS}>
                   New Transaction
                 </Button>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { DashboardLayout } from '@/components/dashboard-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -75,7 +76,8 @@ export default function DailySalesPage() {
   }
 
   return (
-    <div className="flex-1 space-y-8 p-8">
+    <DashboardLayout>
+      <div className="flex-1 space-y-8 p-8">
       <div>
         <h1 className="text-3xl font-bold">Daily Sales Report</h1>
         <p className="text-muted-foreground">Track your daily sales and export reports</p>
@@ -198,6 +200,7 @@ export default function DailySalesPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </DashboardLayout>
   )
 }

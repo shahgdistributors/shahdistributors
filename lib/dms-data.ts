@@ -4,6 +4,7 @@ import type {
   InventoryTransaction,
   POSTransaction,
   Product,
+  ReceiptRecord,
   SalesOrder,
   User,
 } from "@/lib/storage"
@@ -16,6 +17,7 @@ export type DmsDb = {
   salesOrders: SalesOrder[]
   inventoryTransactions: InventoryTransaction[]
   posTransactions: POSTransaction[]
+  receipts: ReceiptRecord[]
   updatedAt: string
 }
 
@@ -44,6 +46,7 @@ export const normalizeDb = (raw: any): DmsDb => {
     salesOrders: ensureArray<SalesOrder>(raw?.salesOrders),
     inventoryTransactions: ensureArray<InventoryTransaction>(raw?.inventoryTransactions),
     posTransactions: ensureArray<POSTransaction>(raw?.posTransactions),
+    receipts: ensureArray<ReceiptRecord>(raw?.receipts),
     updatedAt: new Date().toISOString(),
   }
 }

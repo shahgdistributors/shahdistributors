@@ -333,3 +333,36 @@ export async function importDistributorsFromExcel(file: File): Promise<Partial<D
     reader.readAsBinaryString(file)
   })
 }
+
+export async function importCustomersFromExcel(file: File): Promise<Partial<Customer>[]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+
+    reader.onload = (e) => {
+      try {
+        const data = e.target?.result
+        const workbook = XLSX.read(data, { type: "binary" })
+        const sheetName = workbook.SheetNames[0]
+        const worksheet = workbook.Sheets[sheetName]
+        const jsonData = XLSX.utils.sheet_to_json(worksheet)
+
+        const customers = jsonData.map((row: any) => ({
+          name: row["Customer Name"] || row.Name || row.name,
+          phone: row.Phone || row.phone || "",
+          email: row.Email || row.email || "",
+          address: row.Address || row.address || "",
+          city: row.City || row.city || "",
+          outstandingBalance: Number.parseFloat(row["Outstanding (Rs)"] || row.outstandingBalance || 0),
+          totalPurchases: Number.parseInt(row["Total Purchases"] || row.totalPurchases || 0),
+        }))
+
+        resolve(customers)
+      } catch (error) {
+        reject(error)
+      }
+    }
+
+    reader.onerror = () => reject(new Error("Failed to read file"))
+    reader.readAsBinaryString(file)
+  })
+}

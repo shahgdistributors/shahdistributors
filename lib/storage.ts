@@ -103,6 +103,15 @@ export interface InventoryTransaction {
   createdAt: string
 }
 
+export interface ReceiptRecord {
+  id: string
+  receiptNumber: string
+  transactionId: string
+  customerName?: string
+  createdAt: string
+  html: string
+}
+
 const inMemoryLocal = new Map<string, string>()
 const inMemorySession = new Map<string, string>()
 const serverSyncEnabled = () =>
@@ -568,6 +577,18 @@ class StorageManager {
     this.scheduleServerSync()
   }
 
+  // Receipt methods
+  getReceipts(): ReceiptRecord[] {
+    return this.get<ReceiptRecord>("dms_receipts")
+  }
+
+  createReceipt(receipt: ReceiptRecord): void {
+    const receipts = this.getReceipts()
+    receipts.push(receipt)
+    this.set("dms_receipts", receipts)
+    this.scheduleServerSync()
+  }
+
   // Session management
   setCurrentUser(user: User): void {
     if (typeof window === "undefined") return
@@ -608,6 +629,7 @@ class StorageManager {
       salesOrders: this.getSalesOrders(),
       inventoryTransactions: this.getInventoryTransactions(),
       posTransactions: this.getPOSTransactions(),
+      receipts: this.getReceipts(),
       exportedAt: new Date().toISOString(),
     }
   }
@@ -621,6 +643,7 @@ class StorageManager {
     if (data.salesOrders) this.set("dms_sales_orders", data.salesOrders)
     if (data.inventoryTransactions) this.set("dms_inventory_transactions", data.inventoryTransactions)
     if (data.posTransactions) this.set("dms_pos_transactions", data.posTransactions)
+    if (data.receipts) this.set("dms_receipts", data.receipts)
   }
 }
 
@@ -633,3 +656,4 @@ export const getSalesOrders = () => storage.getSalesOrders()
 export const getUsers = () => storage.getUsers()
 export const getPOSTransactions = () => storage.getPOSTransactions()
 export const getInventoryTransactions = () => storage.getInventoryTransactions()
+export const getReceipts = () => storage.getReceipts()
