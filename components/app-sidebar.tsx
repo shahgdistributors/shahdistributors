@@ -59,9 +59,9 @@ export function AppSidebar() {
             <Image
               src="/images/9515d28e-1e5d-43a0-b693-b831d02b83eb-removalai-preview.png"
               alt="Shah Distributors"
-              width={210}
-              height={60}
-              className="object-contain h-[60px] w-auto"
+              width={260}
+              height={80}
+              className="object-contain h-[72px] w-auto"
               priority
             />
           </div>

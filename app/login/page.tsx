@@ -66,8 +66,8 @@ export default function LoginPage() {
             <Image
               src="/images/9515d28e-1e5d-43a0-b693-b831d02b83eb-removalai-preview.png"
               alt="Shah Distributors"
-              width={200}
-              height={80}
+              width={280}
+              height={110}
               className="object-contain"
               priority
             />
