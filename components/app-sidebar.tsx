@@ -59,9 +59,9 @@ export function AppSidebar() {
             <Image
               src="/logo-light.png"
               alt="Shah Distributors"
-              width={140}
-              height={40}
-              className="object-contain"
+              width={210}
+              height={60}
+              className="object-contain h-[60px] w-auto"
               priority
             />
           </div>

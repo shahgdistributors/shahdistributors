@@ -28,9 +28,9 @@ export default function LandingPage() {
             <Image
               src="/logo-light.png"
               alt="Shah Distributors"
-              width={160}
-              height={40}
-              className="object-contain h-10 w-auto"
+              width={240}
+              height={60}
+              className="object-contain h-[60px] w-auto"
               priority
             />
           </div>
@@ -40,7 +40,7 @@ export default function LandingPage() {
             <a href="#contact" className="text-sm hover:text-amber-400 transition">Contact</a>
           </div>
           <a
-            href="https://wa.me/923334445566"
+            href="https://wa.me/923353535039"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2"
@@ -93,7 +93,7 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a
-                href="https://wa.me/923334445566"
+                href="https://wa.me/923353535039"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 px-8 py-4 rounded-lg font-bold flex items-center justify-center gap-2 transition hover:shadow-lg hover:shadow-amber-500/20"
@@ -261,10 +261,10 @@ export default function LandingPage() {
             Join hundreds of retailers and wholesalers who trust us for premium quality grains.
           </p>
           <a
-            href="https://wa.me/923334445566"
+            href="https://wa.me/923353535039"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 px-8 py-4 rounded-lg font-bold flex items-center justify-center gap-2 transition hover:shadow-lg hover:shadow-amber-500/20 mx-auto"
+            className="inline-flex bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-lg font-bold items-center justify-center gap-2 transition hover:shadow-lg hover:shadow-green-500/25 mx-auto"
           >
             <MessageCircle className="w-5 h-5" />
             Start Conversation
@@ -277,13 +277,13 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-3 gap-12 mb-12">
             <div>
-              <Image
-                src="/logo-light.png"
-                alt="Shah Distributors"
-                width={140}
-                height={40}
-                className="object-contain h-10 w-auto mb-4"
-              />
+            <Image
+              src="/logo-light.png"
+              alt="Shah Distributors"
+              width={210}
+              height={60}
+              className="object-contain h-[60px] w-auto mb-4"
+            />
               <p className="text-slate-400 text-sm">
                 Quality grains for your business needs.
               </p>
@@ -299,8 +299,8 @@ export default function LandingPage() {
             <div>
               <h4 className="font-bold mb-4">Contact</h4>
               <p className="text-slate-400 text-sm mb-2">
-                <a href="https://wa.me/923334445566" className="hover:text-amber-400 transition">
-                  WhatsApp: +92 333 4445566
+                <a href="https://wa.me/923353535039" className="hover:text-amber-400 transition">
+                  WhatsApp: +92 335 3535039
                 </a>
               </p>
               <p className="text-slate-400 text-sm">
