@@ -32,7 +32,8 @@ const seedAdmin = async () => {
 
     return NextResponse.json({ ok: true, created: true })
   } catch (error) {
-    return NextResponse.json({ ok: false, error: "Unable to seed admin user" }, { status: 500 })
+    const message = error instanceof Error ? error.message : "Unknown error"
+    return NextResponse.json({ ok: false, error: message }, { status: 500 })
   }
 }
 
