@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server"
 const ADMIN_EMAIL = "shahgdistributors@gmail.com"
 const ADMIN_PASSWORD = "Shahdistributors123"
 
-export async function POST() {
+const seedAdmin = async () => {
   try {
     const supabase = createSupabaseServerClient()
     const { data: existing, error: lookupError } = await supabase.auth.admin.getUserByEmail(ADMIN_EMAIL)
@@ -34,4 +34,12 @@ export async function POST() {
   } catch (error) {
     return NextResponse.json({ ok: false, error: "Unable to seed admin user" }, { status: 500 })
   }
+}
+
+export async function POST() {
+  return seedAdmin()
+}
+
+export async function GET() {
+  return seedAdmin()
 }
