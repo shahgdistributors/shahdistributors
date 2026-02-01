@@ -10,13 +10,13 @@ interface DistributorViewDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   distributor: Distributor | null
+  totalPurchased: number
 }
 
-export function DistributorViewDialog({ open, onOpenChange, distributor }: DistributorViewDialogProps) {
+export function DistributorViewDialog({ open, onOpenChange, distributor, totalPurchased }: DistributorViewDialogProps) {
   if (!distributor) return null
 
-  const creditUsagePercent = (distributor.outstandingBalance / distributor.creditLimit) * 100
-  const isOverLimit = distributor.outstandingBalance > distributor.creditLimit
+  const hasOutstanding = distributor.outstandingBalance > 0
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -32,13 +32,13 @@ export function DistributorViewDialog({ open, onOpenChange, distributor }: Distr
               <h3 className="text-xl font-bold">{distributor.name}</h3>
               <p className="text-muted-foreground">{distributor.contactPerson}</p>
             </div>
-            {isOverLimit ? (
-              <Badge variant="destructive" className="gap-1">
+            {hasOutstanding ? (
+              <Badge variant="outline" className="gap-1 border-orange-500 text-orange-500">
                 <AlertCircle className="w-3 h-3" />
-                Over Credit Limit
+                Outstanding
               </Badge>
             ) : (
-              <Badge variant="secondary">Active</Badge>
+              <Badge variant="secondary">Clear</Badge>
             )}
           </div>
 
@@ -75,39 +75,19 @@ export function DistributorViewDialog({ open, onOpenChange, distributor }: Distr
                 <div className="font-mono font-medium mt-1">{distributor.gstNumber || "Not provided"}</div>
               </div>
               <div className="bg-muted/50 rounded-lg p-4">
-                <div className="text-xs text-muted-foreground">Credit Limit</div>
-                <div className="text-lg font-bold mt-1">{formatPKR(distributor.creditLimit)}</div>
+                <div className="text-xs text-muted-foreground">Total Purchased</div>
+                <div className="text-lg font-bold mt-1">{formatPKR(totalPurchased)}</div>
               </div>
             </div>
           </div>
 
-          {/* Credit Status */}
+          {/* Payables Status */}
           <div className="space-y-3">
-            <h4 className="font-semibold text-sm">Credit Status</h4>
+            <h4 className="font-semibold text-sm">Payables Status</h4>
             <div className="bg-muted/50 rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Outstanding Balance</span>
                 <span className="text-lg font-bold">{formatPKR(distributor.outstandingBalance)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Available Credit</span>
-                <span className="text-lg font-bold text-primary">
-                  {formatPKR(Math.max(0, distributor.creditLimit - distributor.outstandingBalance))}
-                </span>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Credit Usage</span>
-                  <span>{creditUsagePercent.toFixed(1)}%</span>
-                </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className={`h-full transition-all ${
-                      isOverLimit ? "bg-destructive" : creditUsagePercent >= 80 ? "bg-orange-500" : "bg-primary"
-                    }`}
-                    style={{ width: `${Math.min(100, creditUsagePercent)}%` }}
-                  />
-                </div>
               </div>
             </div>
           </div>

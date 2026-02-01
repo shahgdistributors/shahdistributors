@@ -8,11 +8,12 @@ import { Plus, Search } from "lucide-react"
 import { CustomerTable } from "@/components/customers/customer-table"
 import { CustomerFormDialog } from "@/components/customers/customer-form-dialog"
 import { CustomerViewDialog } from "@/components/customers/customer-view-dialog"
-import { storage, type Customer } from "@/lib/storage"
-import { formatCurrency } from "@/lib/utils"
+import { storage, type Customer, type POSTransaction } from "@/lib/storage"
+import { formatPKR } from "@/lib/utils"
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
+  const [transactions, setTransactions] = useState<POSTransaction[]>([])
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [formDialogOpen, setFormDialogOpen] = useState(false)
@@ -21,7 +22,9 @@ export default function CustomersPage() {
 
   const loadCustomers = () => {
     const allCustomers = storage.getCustomers()
+    const allTransactions = storage.getPOSTransactions()
     setCustomers(allCustomers)
+    setTransactions(allTransactions)
     setFilteredCustomers(allCustomers)
   }
 
@@ -63,8 +66,13 @@ export default function CustomersPage() {
     setFormDialogOpen(true)
   }
 
+  const totalsByCustomer = transactions.reduce<Record<string, number>>((acc, transaction) => {
+    if (!transaction.customerId) return acc
+    acc[transaction.customerId] = (acc[transaction.customerId] || 0) + transaction.totalAmount
+    return acc
+  }, {})
   const totalOutstanding = customers.reduce((sum, c) => sum + c.outstandingBalance, 0)
-  const totalPurchases = customers.reduce((sum, c) => sum + c.totalPurchases, 0)
+  const totalSold = Object.values(totalsByCustomer).reduce((sum, total) => sum + total, 0)
 
   return (
     <DashboardLayout>
@@ -99,12 +107,12 @@ export default function CustomersPage() {
             <div className="text-2xl font-bold mt-1">{customers.length}</div>
           </div>
           <div className="bg-card border rounded-lg p-4">
-            <div className="text-sm text-muted-foreground">Total Purchases</div>
-            <div className="text-2xl font-bold mt-1">{totalPurchases}</div>
+            <div className="text-sm text-muted-foreground">Total Sold</div>
+            <div className="text-2xl font-bold mt-1">{formatPKR(totalSold)}</div>
           </div>
           <div className="bg-card border rounded-lg p-4">
             <div className="text-sm text-muted-foreground">Outstanding Balance</div>
-            <div className="text-2xl font-bold mt-1 text-orange-500">{formatCurrency(totalOutstanding)}</div>
+            <div className="text-2xl font-bold mt-1 text-orange-500">{formatPKR(totalOutstanding)}</div>
           </div>
           <div className="bg-card border rounded-lg p-4">
             <div className="text-sm text-muted-foreground">With Outstanding</div>
@@ -117,6 +125,7 @@ export default function CustomersPage() {
         {/* Table */}
         <CustomerTable
           customers={filteredCustomers}
+          totalsByCustomer={totalsByCustomer}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onView={handleView}

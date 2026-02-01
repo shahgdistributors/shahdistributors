@@ -20,12 +20,13 @@ import { formatPKR } from "@/lib/utils"
 
 interface DistributorTableProps {
   distributors: Distributor[]
+  totalsByDistributor: Record<string, number>
   onEdit: (distributor: Distributor) => void
   onDelete: (id: string) => void
   onView: (distributor: Distributor) => void
 }
 
-export function DistributorTable({ distributors, onEdit, onDelete, onView }: DistributorTableProps) {
+export function DistributorTable({ distributors, totalsByDistributor, onEdit, onDelete, onView }: DistributorTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const handleDelete = () => {
@@ -53,7 +54,7 @@ export function DistributorTable({ distributors, onEdit, onDelete, onView }: Dis
               <TableHead>Contact Person</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Phone</TableHead>
-              <TableHead className="text-right">Credit Limit</TableHead>
+              <TableHead className="text-right">Total Purchased</TableHead>
               <TableHead className="text-right">Outstanding</TableHead>
               <TableHead className="text-center">Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -61,9 +62,8 @@ export function DistributorTable({ distributors, onEdit, onDelete, onView }: Dis
           </TableHeader>
           <TableBody>
             {distributors.map((distributor) => {
-              const creditUsagePercent = (distributor.outstandingBalance / distributor.creditLimit) * 100
-              const isNearLimit = creditUsagePercent >= 80
-              const isOverLimit = distributor.outstandingBalance > distributor.creditLimit
+              const totalPurchased = totalsByDistributor[distributor.id] || 0
+              const hasOutstanding = distributor.outstandingBalance > 0
 
               return (
                 <TableRow key={distributor.id}>
@@ -73,21 +73,16 @@ export function DistributorTable({ distributors, onEdit, onDelete, onView }: Dis
                     {distributor.city}, {distributor.state}
                   </TableCell>
                   <TableCell>{distributor.phone}</TableCell>
-                  <TableCell className="text-right">{formatPKR(distributor.creditLimit)}</TableCell>
+                  <TableCell className="text-right">{formatPKR(totalPurchased)}</TableCell>
                   <TableCell className="text-right">{formatPKR(distributor.outstandingBalance)}</TableCell>
                   <TableCell className="text-center">
-                    {isOverLimit ? (
-                      <Badge variant="destructive" className="gap-1">
-                        <AlertCircle className="w-3 h-3" />
-                        Over Limit
-                      </Badge>
-                    ) : isNearLimit ? (
+                    {hasOutstanding ? (
                       <Badge variant="outline" className="gap-1 border-orange-500 text-orange-500">
                         <AlertCircle className="w-3 h-3" />
-                        Near Limit
+                        Outstanding
                       </Badge>
                     ) : (
-                      <Badge variant="secondary">Active</Badge>
+                      <Badge variant="secondary">Clear</Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">

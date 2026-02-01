@@ -25,6 +25,7 @@ export function CustomerFormDialog({ open, onOpenChange, customer, onSuccess }: 
     email: "",
     address: "",
     city: "",
+    outstandingBalance: "0",
   })
   const [loading, setLoading] = useState(false)
 
@@ -36,6 +37,7 @@ export function CustomerFormDialog({ open, onOpenChange, customer, onSuccess }: 
         email: customer.email || "",
         address: customer.address || "",
         city: customer.city || "",
+        outstandingBalance: String(customer.outstandingBalance ?? 0),
       })
     } else {
       setFormData({
@@ -44,6 +46,7 @@ export function CustomerFormDialog({ open, onOpenChange, customer, onSuccess }: 
         email: "",
         address: "",
         city: "",
+        outstandingBalance: "0",
       })
     }
   }, [customer, open])
@@ -53,6 +56,8 @@ export function CustomerFormDialog({ open, onOpenChange, customer, onSuccess }: 
     setLoading(true)
 
     try {
+      const outstandingBalance = Number.parseFloat(formData.outstandingBalance || "0")
+      const safeOutstandingBalance = Number.isFinite(outstandingBalance) ? Math.max(0, outstandingBalance) : 0
       if (customer) {
         storage.updateCustomer(customer.id, {
           name: formData.name,
@@ -60,6 +65,7 @@ export function CustomerFormDialog({ open, onOpenChange, customer, onSuccess }: 
           email: formData.email,
           address: formData.address,
           city: formData.city,
+          outstandingBalance: safeOutstandingBalance,
         })
       } else {
         storage.createCustomer({
@@ -69,7 +75,7 @@ export function CustomerFormDialog({ open, onOpenChange, customer, onSuccess }: 
           email: formData.email,
           address: formData.address,
           city: formData.city,
-          outstandingBalance: 0,
+          outstandingBalance: safeOutstandingBalance,
           totalPurchases: 0,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -124,6 +130,17 @@ export function CustomerFormDialog({ open, onOpenChange, customer, onSuccess }: 
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="outstandingBalance">Outstanding Balance (PKR)</Label>
+              <Input
+                id="outstandingBalance"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.outstandingBalance}
+                onChange={(e) => setFormData({ ...formData, outstandingBalance: e.target.value })}
+              />
             </div>
           </div>
 

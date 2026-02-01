@@ -4,9 +4,10 @@ import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Minus, Search, TrendingUp, TrendingDown, Package } from "lucide-react"
+import { Plus, Minus, Search, TrendingUp, TrendingDown, Package, SlidersHorizontal } from "lucide-react"
 import { AddStockDialog } from "@/components/inventory/add-stock-dialog"
 import { ReduceStockDialog } from "@/components/inventory/reduce-stock-dialog"
+import { ManualAdjustDialog } from "@/components/inventory/manual-adjust-dialog"
 import { storage, type InventoryTransaction, type Product } from "@/lib/storage"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -20,6 +21,7 @@ export default function InventoryPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const [reduceDialogOpen, setReduceDialogOpen] = useState(false)
+  const [adjustDialogOpen, setAdjustDialogOpen] = useState(false)
 
   const loadData = () => {
     setProducts(storage.getProducts())
@@ -87,6 +89,10 @@ export default function InventoryPage() {
             <Button variant="outline" onClick={() => setReduceDialogOpen(true)} className="gap-2">
               <Minus className="w-4 h-4" />
               Reduce Stock
+            </Button>
+            <Button variant="outline" onClick={() => setAdjustDialogOpen(true)} className="gap-2">
+              <SlidersHorizontal className="w-4 h-4" />
+              Manual Adjustment
             </Button>
             <Button onClick={() => setAddDialogOpen(true)} className="gap-2">
               <Plus className="w-4 h-4" />
@@ -265,6 +271,7 @@ export default function InventoryPage() {
         {/* Dialogs */}
         <AddStockDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onSuccess={loadData} />
         <ReduceStockDialog open={reduceDialogOpen} onOpenChange={setReduceDialogOpen} onSuccess={loadData} />
+        <ManualAdjustDialog open={adjustDialogOpen} onOpenChange={setAdjustDialogOpen} onSuccess={loadData} />
       </div>
     </DashboardLayout>
   )

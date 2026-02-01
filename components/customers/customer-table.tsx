@@ -20,12 +20,13 @@ import { formatPKR } from "@/lib/utils"
 
 interface CustomerTableProps {
   customers: Customer[]
+  totalsByCustomer: Record<string, number>
   onEdit: (customer: Customer) => void
   onDelete: (id: string) => void
   onView: (customer: Customer) => void
 }
 
-export function CustomerTable({ customers, onEdit, onDelete, onView }: CustomerTableProps) {
+export function CustomerTable({ customers, totalsByCustomer, onEdit, onDelete, onView }: CustomerTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const handleDelete = () => {
@@ -52,7 +53,7 @@ export function CustomerTable({ customers, onEdit, onDelete, onView }: CustomerT
               <TableHead>Name</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>City</TableHead>
-              <TableHead className="text-right">Total Purchases</TableHead>
+              <TableHead className="text-right">Total Sold</TableHead>
               <TableHead className="text-right">Outstanding Balance</TableHead>
               <TableHead className="text-center">Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -61,13 +62,14 @@ export function CustomerTable({ customers, onEdit, onDelete, onView }: CustomerT
           <TableBody>
             {customers.map((customer) => {
               const hasBalance = customer.outstandingBalance > 0
+              const totalSold = totalsByCustomer[customer.id] || 0
 
               return (
                 <TableRow key={customer.id}>
                   <TableCell className="font-medium">{customer.name}</TableCell>
                   <TableCell>{customer.phone}</TableCell>
                   <TableCell>{customer.city || "—"}</TableCell>
-                  <TableCell className="text-right">{customer.totalPurchases}</TableCell>
+                  <TableCell className="text-right">{formatPKR(totalSold)}</TableCell>
                   <TableCell className="text-right">{formatPKR(customer.outstandingBalance)}</TableCell>
                   <TableCell className="text-center">
                     {hasBalance ? (

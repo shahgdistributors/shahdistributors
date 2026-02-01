@@ -27,6 +27,7 @@ export function CustomerViewDialog({ open, onOpenChange, customer }: CustomerVie
   if (!customer) return null
 
   const hasBalance = customer.outstandingBalance > 0
+  const totalSold = purchases.reduce((sum, purchase) => sum + purchase.totalAmount, 0)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -82,8 +83,8 @@ export function CustomerViewDialog({ open, onOpenChange, customer }: CustomerVie
             <h4 className="font-semibold text-sm">Account Summary</h4>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-muted/50 rounded-lg p-4">
-                <div className="text-xs text-muted-foreground">Total Purchases</div>
-                <div className="text-lg font-bold mt-1">{customer.totalPurchases}</div>
+                <div className="text-xs text-muted-foreground">Total Sold</div>
+                <div className="text-lg font-bold mt-1">{formatPKR(totalSold)}</div>
               </div>
               <div className="bg-muted/50 rounded-lg p-4">
                 <div className="text-xs text-muted-foreground">Outstanding Balance</div>

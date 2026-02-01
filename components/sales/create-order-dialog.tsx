@@ -103,22 +103,19 @@ export function CreateOrderDialog({ open, onOpenChange, onSuccess }: CreateOrder
         updatedAt: new Date().toISOString(),
       })
 
-      // Update product stock and create inventory transactions
+      // Update product stock and create inventory transactions (purchase from distributor)
       orderItems.forEach((item) => {
         const product = products.find((p) => p.id === item.productId)
         if (product) {
           storage.updateProduct(item.productId, {
-            stock: product.stock - item.quantity,
+            stock: product.stock + item.quantity,
           })
 
           storage.createInventoryTransaction({
             id: `${Date.now()}-${item.productId}`,
             productId: item.productId,
-            type: "Sale",
-            quantity: -item.quantity,
-            reference: orderNumber,
-            notes: `Sold to distributor`,
-            createdBy: user.id,
+            transactionType: "In",
+            quantity: item.quantity,
             createdAt: new Date().toISOString(),
           })
         }
