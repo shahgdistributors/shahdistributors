@@ -192,17 +192,7 @@ class StorageManager {
   }
 
   private initializeDefaultData() {
-    if (!this.getUsers().length) {
-      // Create default admin user
-      this.createUser({
-        id: "1",
-        username: "admin",
-        password: "admin123",
-        fullName: "System Administrator",
-        role: "Admin",
-        createdAt: new Date().toISOString(),
-      })
-    }
+    this.ensureInitialAdminUser()
 
     if (!this.getProducts().length) {
       const groceryProducts: Product[] = [
@@ -342,6 +332,24 @@ class StorageManager {
 
       groceryProducts.forEach((product) => this.createProduct(product))
     }
+  }
+
+  private ensureInitialAdminUser() {
+    const users = this.getUsers()
+    const adminEmail = "shahgdistributors@gmail.com"
+    const existing = users.find((u) => u.username === adminEmail)
+    if (existing) return
+
+    users.push({
+      id: "1",
+      username: adminEmail,
+      password: "Shahdistributors123",
+      fullName: "Shah Distributors",
+      role: "Admin",
+      createdAt: new Date().toISOString(),
+    })
+    this.set("dms_users", users)
+    this.scheduleServerSync()
   }
 
   private scheduleServerSync() {

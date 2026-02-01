@@ -20,6 +20,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     initializeTheme()
+    void fetch("/api/auth/seed-admin", { method: "POST" }).catch(() => {})
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,10 +108,6 @@ export default function LoginPage() {
             <Button type="submit" className="w-full h-11 text-base font-medium" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}
             </Button>
-            <div className="text-xs text-muted-foreground text-center pt-2">
-              Default: username: <span className="font-mono font-semibold">admin</span> / password:{" "}
-              <span className="font-mono font-semibold">admin123</span>
-            </div>
           </form>
         </CardContent>
       </Card>
