@@ -39,9 +39,9 @@ export default function LandingPage() {
             <Image
               src={LOGO_SRC}
               alt="Shah Distributors"
-              width={320}
-              height={90}
-              className="object-contain h-[80px] w-auto"
+              width={480}
+              height={135}
+              className="object-contain h-[120px] w-auto"
               priority
             />
           </div>
@@ -284,9 +284,9 @@ export default function LandingPage() {
             <Image
               src={LOGO_SRC}
               alt="Shah Distributors"
-              width={260}
-              height={80}
-              className="object-contain h-[80px] w-auto mb-4"
+              width={390}
+              height={120}
+              className="object-contain h-[120px] w-auto mb-4"
             />
               <p className="text-slate-400 text-sm">
                 Quality grains for your business needs.
