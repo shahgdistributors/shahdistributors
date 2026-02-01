@@ -48,7 +48,8 @@ export default function POSPage() {
   }
 
   const loadCustomers = () => {
-    setCustomers(storage.getCustomers())
+    const nextCustomers = storage.getCustomers()
+    setCustomers(nextCustomers)
   }
 
   const handleCustomerSelect = (customerId: string) => {
