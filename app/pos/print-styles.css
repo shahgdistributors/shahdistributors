@@ -1,0 +1,51 @@
+@media print {
+  /* Hide everything except the receipt */
+  body * {
+    visibility: hidden;
+  }
+
+  #receipt-print-area,
+  #receipt-print-area * {
+    visibility: visible;
+  }
+
+  #receipt-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+  }
+
+  /* Receipt styling for thermal printer */
+  .receipt-container {
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .receipt-header {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .receipt-divider {
+    border-top: 1px dashed #000;
+    margin: 8px 0;
+  }
+
+  .receipt-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+  }
+
+  .receipt-total {
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  /* Hide print button when printing */
+  button {
+    display: none !important;
+  }
+}
