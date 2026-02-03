@@ -117,12 +117,12 @@ export function DistributorFormDialog({ open, onOpenChange, distributor, onSucce
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{distributor ? "Edit Distributor" : "Add New Distributor"}</DialogTitle>
+          <DialogTitle>{distributor ? "Edit Company" : "Add New Company"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Basic Information</h3>
+            <h3 className="text-sm font-semibold">Company Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Company Name *</Label>

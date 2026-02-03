@@ -215,7 +215,7 @@ export function ExcelImportExport() {
             </Button>
             <Button variant="outline" onClick={handleExportDistributors} className="gap-2 bg-transparent">
               <FileSpreadsheet className="w-4 h-4" />
-              Export Distributors
+              Export Companies
             </Button>
             <Button variant="outline" onClick={handleExportOrders} className="gap-2 bg-transparent">
               <FileSpreadsheet className="w-4 h-4" />
@@ -271,7 +271,7 @@ export function ExcelImportExport() {
                 <Button variant="outline" className="gap-2 w-full bg-transparent" disabled={importing} asChild>
                   <span>
                     <Upload className="w-4 h-4" />
-                    Import Distributors
+                    Import Companies
                   </span>
                 </Button>
               </label>

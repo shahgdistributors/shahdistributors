@@ -279,14 +279,14 @@ export default function ExportDataPage() {
           </CardContent>
         </Card>
 
-        {/* Distributors Sheet */}
+        {/* Companies Sheet */}
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-indigo-600" />
-                  Distributors Master Data
+                  Companies Master Data
                 </CardTitle>
                 <CardDescription>
                   Export all distributor information including contact details and credit limits
@@ -302,7 +302,7 @@ export default function ExportDataPage() {
               size="lg"
             >
               <Download className="w-4 h-4 mr-2" />
-              {isLoading === "distributors" ? "Exporting..." : "Download Distributors Sheet"}
+              {isLoading === "distributors" ? "Exporting..." : "Download Companies Sheet"}
             </Button>
           </CardContent>
         </Card>

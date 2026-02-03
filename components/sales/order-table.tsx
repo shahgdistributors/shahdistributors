@@ -66,7 +66,7 @@ export function OrderTable({ orders, distributors, onView, onDelete }: OrderTabl
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead>Order Number</TableHead>
-              <TableHead>Distributor</TableHead>
+              <TableHead>Company</TableHead>
               <TableHead>Date</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead className="text-center">Payment</TableHead>

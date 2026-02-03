@@ -57,9 +57,9 @@ export function OrderViewDialog({ open, onOpenChange, order, distributor, produc
             </div>
           </div>
 
-          {/* Distributor Information */}
+          {/* Company Information */}
           <div className="bg-muted/50 rounded-lg p-4">
-            <div className="font-semibold mb-2">Distributor Details</div>
+            <div className="font-semibold mb-2">Company Details</div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <div className="text-muted-foreground">Company</div>

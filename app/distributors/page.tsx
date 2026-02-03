@@ -82,12 +82,12 @@ export default function DistributorsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Distributors</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Companies</h1>
             <p className="text-muted-foreground mt-1">Track suppliers you buy from and total purchases</p>
           </div>
           <Button onClick={handleAddNew} className="gap-2">
             <Plus className="w-4 h-4" />
-            Add Distributor
+            Add Company
           </Button>
         </div>
 
@@ -105,7 +105,7 @@ export default function DistributorsPage() {
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-card border rounded-lg p-4">
-            <div className="text-sm text-muted-foreground">Total Distributors</div>
+            <div className="text-sm text-muted-foreground">Total Companies</div>
             <div className="text-2xl font-bold mt-1">{distributors.length}</div>
           </div>
           <div className="bg-card border rounded-lg p-4">

@@ -12,15 +12,15 @@ import { formatPKR } from "@/lib/utils"
 export default function ReportsPage() {
   const [timeRange, setTimeRange] = useState("all")
   const [reports, setReports] = useState({
-    salesByDistributor: [] as Array<{ id: string; name: string; orders: number; revenue: number }>,
+    salesByCustomer: [] as Array<{ id: string; name: string; orders: number; revenue: number }>,
     salesByProduct: [] as Array<{ id: string; name: string; quantity: number; revenue: number }>,
     topProducts: [] as Array<{ id: string; name: string; quantity: number; revenue: number }>,
-    topDistributors: [] as Array<{ id: string; name: string; orders: number; revenue: number }>,
+    topCustomers: [] as Array<{ id: string; name: string; orders: number; revenue: number }>,
     summary: {
       totalRevenue: 0,
       totalOrders: 0,
       totalProducts: 0,
-      totalDistributors: 0,
+      totalCustomers: 0,
       avgOrderValue: 0,
     },
   })
@@ -31,34 +31,34 @@ export default function ReportsPage() {
 
   const generateReports = () => {
     const products = storage.getProducts()
-    const distributors = storage.getDistributors()
-    let orders = storage.getSalesOrders()
+    const customers = storage.getCustomers()
+    let transactions = storage.getPOSTransactions()
 
     // Filter by time range
     const now = new Date()
     if (timeRange === "month") {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-      orders = orders.filter((o) => new Date(o.createdAt) >= monthStart)
+      transactions = transactions.filter((o) => new Date(o.createdAt) >= monthStart)
     } else if (timeRange === "week") {
       const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-      orders = orders.filter((o) => new Date(o.createdAt) >= weekStart)
+      transactions = transactions.filter((o) => new Date(o.createdAt) >= weekStart)
     }
 
-    // Sales by Distributor
-    const salesByDist = distributors.map((dist) => {
-      const distOrders = orders.filter((o) => o.distributorId === dist.id)
+    // Sales by Customer
+    const salesByCustomer = customers.map((customer) => {
+      const custOrders = transactions.filter((o) => o.customerId === customer.id)
       return {
-        id: dist.id,
-        name: dist.name,
-        orders: distOrders.length,
-        revenue: distOrders.reduce((sum, o) => sum + o.totalAmount, 0),
+        id: customer.id,
+        name: customer.name,
+        orders: custOrders.length,
+        revenue: custOrders.reduce((sum, o) => sum + o.totalAmount, 0),
       }
     })
-    salesByDist.sort((a, b) => b.revenue - a.revenue)
+    salesByCustomer.sort((a, b) => b.revenue - a.revenue)
 
     // Sales by Product
     const productSales = new Map<string, { quantity: number; revenue: number }>()
-    orders.forEach((order) => {
+    transactions.forEach((order) => {
       order.items.forEach((item) => {
         const existing = productSales.get(item.productId) || { quantity: 0, revenue: 0 }
         productSales.set(item.productId, {
@@ -80,19 +80,19 @@ export default function ReportsPage() {
     salesByProd.sort((a, b) => b.revenue - a.revenue)
 
     // Summary
-    const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0)
-    const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0
+    const totalRevenue = transactions.reduce((sum, o) => sum + o.totalAmount, 0)
+    const avgOrderValue = transactions.length > 0 ? totalRevenue / transactions.length : 0
 
     setReports({
-      salesByDistributor: salesByDist,
+      salesByCustomer,
       salesByProduct: salesByProd,
       topProducts: salesByProd.slice(0, 5),
-      topDistributors: salesByDist.slice(0, 5),
+      topCustomers: salesByCustomer.slice(0, 5),
       summary: {
         totalRevenue,
-        totalOrders: orders.length,
+        totalOrders: transactions.length,
         totalProducts: products.length,
-        totalDistributors: distributors.length,
+        totalCustomers: customers.length,
         avgOrderValue,
       },
     })
@@ -158,12 +158,12 @@ export default function ReportsPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Distributors</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Active Customers</CardTitle>
               <Users className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{reports.summary.totalDistributors}</div>
-              <p className="text-xs text-muted-foreground mt-1">Partners</p>
+              <div className="text-2xl font-bold">{reports.summary.totalCustomers}</div>
+              <p className="text-xs text-muted-foreground mt-1">Customers</p>
             </CardContent>
           </Card>
         </div>
@@ -204,13 +204,13 @@ export default function ReportsPage() {
             </CardContent>
           </Card>
 
-          {/* Top Distributors */}
+          {/* Top Customers */}
           <Card>
             <CardHeader>
-              <CardTitle>Top Distributors</CardTitle>
+              <CardTitle>Top Customers</CardTitle>
             </CardHeader>
             <CardContent>
-              {reports.topDistributors.length === 0 ? (
+              {reports.topCustomers.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>No sales data available for this period.</p>
                 </div>
@@ -219,17 +219,17 @@ export default function ReportsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50">
-                        <TableHead>Distributor</TableHead>
+                        <TableHead>Customer</TableHead>
                         <TableHead className="text-right">Orders</TableHead>
                         <TableHead className="text-right">Revenue</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {reports.topDistributors.map((dist) => (
-                        <TableRow key={dist.id}>
-                          <TableCell className="font-medium">{dist.name}</TableCell>
-                          <TableCell className="text-right">{dist.orders}</TableCell>
-                          <TableCell className="text-right font-semibold">{formatPKR(dist.revenue)}</TableCell>
+                      {reports.topCustomers.map((customer) => (
+                        <TableRow key={customer.id}>
+                          <TableCell className="font-medium">{customer.name}</TableCell>
+                          <TableCell className="text-right">{customer.orders}</TableCell>
+                          <TableCell className="text-right font-semibold">{formatPKR(customer.revenue)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -268,7 +268,10 @@ export default function ReportsPage() {
                         <TableCell className="text-right">{product.quantity}</TableCell>
                         <TableCell className="text-right font-semibold">{formatPKR(product.revenue)}</TableCell>
                         <TableCell className="text-right">
-                          {((product.revenue / reports.summary.totalRevenue) * 100).toFixed(1)}%
+                          {reports.summary.totalRevenue > 0
+                            ? ((product.revenue / reports.summary.totalRevenue) * 100).toFixed(1)
+                            : "0.0"}
+                          %
                         </TableCell>
                       </TableRow>
                     ))}
@@ -279,13 +282,13 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
 
-        {/* Complete Sales by Distributor */}
+        {/* Complete Sales by Customer */}
         <Card>
           <CardHeader>
-            <CardTitle>Sales by Distributor (Complete List)</CardTitle>
+            <CardTitle>Sales by Customer (Complete List)</CardTitle>
           </CardHeader>
           <CardContent>
-            {reports.salesByDistributor.length === 0 ? (
+            {reports.salesByCustomer.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p>No sales data available for this period.</p>
               </div>
@@ -294,20 +297,20 @@ export default function ReportsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
-                      <TableHead>Distributor Name</TableHead>
+                      <TableHead>Customer Name</TableHead>
                       <TableHead className="text-right">Total Orders</TableHead>
                       <TableHead className="text-right">Total Revenue</TableHead>
                       <TableHead className="text-right">Avg Order Value</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {reports.salesByDistributor.map((dist) => (
-                      <TableRow key={dist.id}>
-                        <TableCell className="font-medium">{dist.name}</TableCell>
-                        <TableCell className="text-right">{dist.orders}</TableCell>
-                        <TableCell className="text-right font-semibold">{formatPKR(dist.revenue)}</TableCell>
+                    {reports.salesByCustomer.map((customer) => (
+                      <TableRow key={customer.id}>
+                        <TableCell className="font-medium">{customer.name}</TableCell>
+                        <TableCell className="text-right">{customer.orders}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatPKR(customer.revenue)}</TableCell>
                         <TableCell className="text-right">
-                          {formatPKR(dist.orders > 0 ? dist.revenue / dist.orders : 0)}
+                          {formatPKR(customer.orders > 0 ? customer.revenue / customer.orders : 0)}
                         </TableCell>
                       </TableRow>
                     ))}

@@ -144,15 +144,15 @@ export function CreateOrderDialog({ open, onOpenChange, onSuccess }: CreateOrder
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Order</DialogTitle>
+          <DialogTitle>Create New Purchase</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Distributor Selection */}
+          {/* Company Selection */}
           <div className="space-y-2">
-            <Label>Select Distributor *</Label>
+            <Label>Select Company *</Label>
             <Select value={selectedDistributor} onValueChange={setSelectedDistributor}>
               <SelectTrigger>
-                <SelectValue placeholder="Choose a distributor" />
+                <SelectValue placeholder="Choose a company" />
               </SelectTrigger>
               <SelectContent>
                 {distributors.map((dist) => (
@@ -259,7 +259,7 @@ export function CreateOrderDialog({ open, onOpenChange, onSuccess }: CreateOrder
               Cancel
             </Button>
             <Button type="submit" disabled={!isValid || loading}>
-              {loading ? "Creating Order..." : "Create Order"}
+              {loading ? "Creating Purchase..." : "Create Purchase"}
             </Button>
           </div>
         </form>

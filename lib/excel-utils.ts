@@ -53,7 +53,7 @@ export function exportDistributorsToExcel(distributors: Distributor[]) {
 
   const ws = XLSX.utils.json_to_sheet(data)
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, "Distributors")
+  XLSX.utils.book_append_sheet(wb, ws, "Companies")
 
   ws["!cols"] = [
     { wch: 15 },
@@ -77,7 +77,7 @@ export function exportDistributorsToExcel(distributors: Distributor[]) {
 export function exportOrdersToExcel(orders: SalesOrder[], distributorNames: Map<string, string>) {
   const data = orders.map((o) => ({
     "Order Number": o.orderNumber,
-    Distributor: distributorNames.get(o.distributorId) || "Unknown",
+    Company: distributorNames.get(o.distributorId) || "Unknown",
     "Items Count": o.items.length,
     "Subtotal (Rs)": o.subtotal,
     "Tax (Rs)": o.taxAmount,
@@ -184,7 +184,9 @@ export function exportPOSTransactionsToExcel(transactions: POSTransaction[]) {
     "Tax (Rs)": t.taxAmount,
     "Discount (Rs)": t.discount,
     "Total Amount (Rs)": t.totalAmount,
-    "Amount Paid (Rs)": t.amountPaid,
+    "Amount Paid (Rs)": t.amountReceived,
+    "Outstanding (Rs)": t.outstandingAmount,
+    "Due Date": t.dueDate ? new Date(t.dueDate).toLocaleDateString("en-PK") : "-",
     "Payment Method": t.paymentMethod,
     "Date": new Date(t.createdAt).toLocaleDateString('en-PK'),
     "Time": new Date(t.createdAt).toLocaleTimeString('en-PK'),
@@ -202,6 +204,7 @@ export function exportPOSTransactionsToExcel(transactions: POSTransaction[]) {
     { wch: 12 },
     { wch: 10 },
     { wch: 12 },
+    { wch: 15 },
     { wch: 15 },
     { wch: 15 },
     { wch: 15 },
@@ -245,12 +248,12 @@ export function exportAllDataToExcel(
     "Outstanding (Rs)": d.outstandingBalance,
   }))
   const wsDist = XLSX.utils.json_to_sheet(distData)
-  XLSX.utils.book_append_sheet(wb, wsDist, "Distributors")
+  XLSX.utils.book_append_sheet(wb, wsDist, "Companies")
 
   // Orders sheet
   const ordersData = orders.map((o) => ({
     "Order Number": o.orderNumber,
-    Distributor: distributorNames.get(o.distributorId) || "Unknown",
+    Company: distributorNames.get(o.distributorId) || "Unknown",
     "Total Amount (₹)": o.totalAmount,
     "Payment Status": o.paymentStatus,
     "Delivery Status": o.deliveryStatus,

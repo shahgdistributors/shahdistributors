@@ -39,7 +39,7 @@ export function DistributorTable({ distributors, totalsByDistributor, onEdit, on
   if (distributors.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <p>No distributors found. Add your first distributor to get started.</p>
+        <p>No companies found. Add your first company to get started.</p>
       </div>
     )
   }

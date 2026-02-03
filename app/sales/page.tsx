@@ -4,30 +4,28 @@ import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Search } from "lucide-react"
-import { OrderTable } from "@/components/sales/order-table"
-import { CreateOrderDialog } from "@/components/sales/create-order-dialog"
-import { OrderViewDialog } from "@/components/sales/order-view-dialog"
-import { storage, type SalesOrder, type Distributor, type Product } from "@/lib/storage"
+import { Search, Eye } from "lucide-react"
+import { storage, type POSTransaction, type Customer, type ReceiptRecord } from "@/lib/storage"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { formatCurrency } from "@/lib/utils"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { formatPKR } from "@/lib/utils"
 
 export default function SalesPage() {
-  const [orders, setOrders] = useState<SalesOrder[]>([])
-  const [filteredOrders, setFilteredOrders] = useState<SalesOrder[]>([])
-  const [distributors, setDistributors] = useState<Distributor[]>([])
-  const [products, setProducts] = useState<Product[]>([])
+  const [transactions, setTransactions] = useState<POSTransaction[]>([])
+  const [filteredTransactions, setFilteredTransactions] = useState<POSTransaction[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [receipts, setReceipts] = useState<ReceiptRecord[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [paymentFilter, setPaymentFilter] = useState("all")
-  const [deliveryFilter, setDeliveryFilter] = useState("all")
-  const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const [viewDialogOpen, setViewDialogOpen] = useState(false)
-  const [selectedOrder, setSelectedOrder] = useState<SalesOrder | null>(null)
 
   const loadData = () => {
-    setOrders(storage.getSalesOrders())
-    setDistributors(storage.getDistributors())
-    setProducts(storage.getProducts())
+    const allTransactions = storage.getPOSTransactions()
+    const allCustomers = storage.getCustomers()
+    const allReceipts = storage.getReceipts()
+    setTransactions(allTransactions)
+    setCustomers(allCustomers)
+    setReceipts(allReceipts)
   }
 
   useEffect(() => {
@@ -35,39 +33,61 @@ export default function SalesPage() {
   }, [])
 
   useEffect(() => {
-    let filtered = orders
+    let filtered = transactions
 
     // Search filter
     if (searchQuery) {
-      filtered = filtered.filter((o) => o.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()))
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter((t) => {
+        const customerName = getCustomerName(t).toLowerCase()
+        return t.receiptNumber.toLowerCase().includes(query) || customerName.includes(query)
+      })
     }
 
     // Payment filter
     if (paymentFilter !== "all") {
-      filtered = filtered.filter((o) => o.paymentStatus === paymentFilter)
+      filtered = filtered.filter((t) => getPaymentStatus(t) === paymentFilter)
     }
 
-    // Delivery filter
-    if (deliveryFilter !== "all") {
-      filtered = filtered.filter((o) => o.deliveryStatus === deliveryFilter)
+    setFilteredTransactions(filtered)
+  }, [searchQuery, paymentFilter, transactions])
+
+  const getCustomerName = (transaction: POSTransaction) => {
+    if (transaction.customerName) return transaction.customerName
+    const customer = customers.find((c) => c.id === transaction.customerId)
+    return customer?.name || "Walk-in Customer"
+  }
+
+  const getOutstanding = (transaction: POSTransaction) => {
+    if (typeof transaction.outstandingAmount === "number") {
+      return Math.max(0, transaction.outstandingAmount)
     }
-
-    setFilteredOrders(filtered)
-  }, [searchQuery, paymentFilter, deliveryFilter, orders])
-
-  const handleView = (order: SalesOrder) => {
-    setSelectedOrder(order)
-    setViewDialogOpen(true)
+    const received = transaction.amountReceived || 0
+    return Math.max(0, transaction.totalAmount - received)
   }
 
-  const handleDelete = (id: string) => {
-    storage.deleteSalesOrder(id)
-    loadData()
+  const getPaymentStatus = (transaction: POSTransaction) => {
+    const received = transaction.amountReceived || 0
+    const outstanding = getOutstanding(transaction)
+    if (outstanding <= 0) return "Paid"
+    if (received > 0) return "Partial"
+    return "Pending"
   }
 
-  const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0)
-  const pendingPayments = orders.filter((o) => o.paymentStatus === "Pending").length
-  const pendingDeliveries = orders.filter((o) => o.deliveryStatus === "Pending").length
+  const handleViewReceipt = (transactionId: string) => {
+    const receipt = receipts.find((r) => r.transactionId === transactionId)
+    if (!receipt) return
+    const receiptWindow = window.open("", "_blank", "width=900,height=700")
+    if (!receiptWindow) return
+    receiptWindow.document.open()
+    receiptWindow.document.write(receipt.html)
+    receiptWindow.document.close()
+    receiptWindow.focus()
+  }
+
+  const totalRevenue = transactions.reduce((sum, t) => sum + t.totalAmount, 0)
+  const outstandingTotal = transactions.reduce((sum, t) => sum + getOutstanding(t), 0)
+  const pendingPayments = transactions.filter((t) => getPaymentStatus(t) !== "Paid").length
 
   return (
     <DashboardLayout>
@@ -75,13 +95,9 @@ export default function SalesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Sales & Orders</h1>
-            <p className="text-muted-foreground mt-1">Create and manage sales orders</p>
+            <h1 className="text-3xl font-bold tracking-tight">Sales</h1>
+            <p className="text-muted-foreground mt-1">All POS sales and customer payments</p>
           </div>
-          <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
-            <Plus className="w-4 h-4" />
-            New Order
-          </Button>
         </div>
 
         {/* Filters */}
@@ -89,7 +105,7 @@ export default function SalesPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search orders by order number..."
+              placeholder="Search by receipt number or customer..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -106,54 +122,82 @@ export default function SalesPage() {
               <SelectItem value="Paid">Paid</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Delivery Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Deliveries</SelectItem>
-              <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="Processing">Processing</SelectItem>
-              <SelectItem value="Shipped">Shipped</SelectItem>
-              <SelectItem value="Delivered">Delivered</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="bg-card border rounded-lg p-4">
             <div className="text-sm text-muted-foreground">Total Orders</div>
-            <div className="text-2xl font-bold mt-1">{orders.length}</div>
+            <div className="text-2xl font-bold mt-1">{transactions.length}</div>
           </div>
           <div className="bg-card border rounded-lg p-4">
             <div className="text-sm text-muted-foreground">Total Revenue</div>
-            <div className="text-2xl font-bold mt-1">{formatCurrency(totalRevenue)}</div>
+            <div className="text-2xl font-bold mt-1">{formatPKR(totalRevenue)}</div>
+          </div>
+          <div className="bg-card border rounded-lg p-4">
+            <div className="text-sm text-muted-foreground">Outstanding Amount</div>
+            <div className="text-2xl font-bold mt-1 text-orange-500">{formatPKR(outstandingTotal)}</div>
           </div>
           <div className="bg-card border rounded-lg p-4">
             <div className="text-sm text-muted-foreground">Pending Payments</div>
             <div className="text-2xl font-bold mt-1 text-orange-500">{pendingPayments}</div>
           </div>
-          <div className="bg-card border rounded-lg p-4">
-            <div className="text-sm text-muted-foreground">Pending Deliveries</div>
-            <div className="text-2xl font-bold mt-1 text-orange-500">{pendingDeliveries}</div>
-          </div>
         </div>
 
         {/* Table */}
-        <OrderTable orders={filteredOrders} distributors={distributors} onView={handleView} onDelete={handleDelete} />
-
-        {/* Dialogs */}
-        <CreateOrderDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} onSuccess={loadData} />
-
-        <OrderViewDialog
-          open={viewDialogOpen}
-          onOpenChange={setViewDialogOpen}
-          order={selectedOrder}
-          distributor={distributors.find((d) => d.id === selectedOrder?.distributorId) || null}
-          products={products}
-          onUpdate={loadData}
-        />
+        <div className="border rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead>Receipt #</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Total</TableHead>
+                <TableHead className="text-right">Paid</TableHead>
+                <TableHead className="text-right">Outstanding</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredTransactions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    No sales found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredTransactions.map((transaction) => {
+                  const outstanding = getOutstanding(transaction)
+                  const status = getPaymentStatus(transaction)
+                  return (
+                    <TableRow key={transaction.id}>
+                      <TableCell className="font-mono font-medium">{transaction.receiptNumber}</TableCell>
+                      <TableCell>{getCustomerName(transaction)}</TableCell>
+                      <TableCell>{new Date(transaction.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right font-semibold">{formatPKR(transaction.totalAmount)}</TableCell>
+                      <TableCell className="text-right">{formatPKR(transaction.amountReceived || 0)}</TableCell>
+                      <TableCell className="text-right">{formatPKR(outstanding)}</TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant={status === "Paid" ? "secondary" : "outline"}>{status}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleViewReceipt(transaction.id)}
+                          disabled={!receipts.some((r) => r.transactionId === transaction.id)}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </DashboardLayout>
   )

@@ -22,7 +22,7 @@ export function DistributorViewDialog({ open, onOpenChange, distributor, totalPu
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Distributor Details</DialogTitle>
+          <DialogTitle className="text-2xl">Company Details</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -66,7 +66,7 @@ export function DistributorViewDialog({ open, onOpenChange, distributor, totalPu
             </div>
           </div>
 
-          {/* Business Details */}
+          {/* Company Details */}
           <div className="space-y-3">
             <h4 className="font-semibold text-sm">Business Details</h4>
             <div className="grid grid-cols-2 gap-4">

@@ -89,7 +89,9 @@ export interface POSTransaction {
   discount: number
   totalAmount: number
   paymentMethod: "Cash" | "Card" | "UPI" | "Other"
-  amountPaid: number
+  amountReceived: number
+  outstandingAmount: number
+  dueDate?: string
   change: number
   createdBy: string
   createdAt: string

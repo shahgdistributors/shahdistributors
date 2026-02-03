@@ -27,6 +27,7 @@ export default function POSPage() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash")
   const [amountReceived, setAmountReceived] = useState("")
+  const [dueDate, setDueDate] = useState("")
   const [customerName, setCustomerName] = useState("")
   const [showReceipt, setShowReceipt] = useState(false)
   const [lastTransaction, setLastTransaction] = useState<POSTransaction | null>(null)
@@ -123,7 +124,9 @@ export default function POSPage() {
             <div class="summary-row"><span>Subtotal:</span><span>${formatPKRWithDecimals(transaction.subtotal)}</span></div>
             <div class="summary-row"><span>Tax (18% GST):</span><span>${formatPKRWithDecimals(transaction.taxAmount)}</span></div>
             <div class="summary-row total"><span>Total:</span><span>${formatPKRWithDecimals(transaction.totalAmount)}</span></div>
-            <div class="summary-row"><span>Payment (${transaction.paymentMethod}):</span><span>${formatPKRWithDecimals(transaction.amountReceived)}</span></div>
+            <div class="summary-row"><span>Paid (${transaction.paymentMethod}):</span><span>${formatPKRWithDecimals(transaction.amountReceived)}</span></div>
+            ${transaction.outstandingAmount > 0 ? `<div class="summary-row"><span>Outstanding:</span><span>${formatPKRWithDecimals(transaction.outstandingAmount)}</span></div>` : ""}
+            ${transaction.dueDate ? `<div class="summary-row"><span>Due Date:</span><span>${new Date(transaction.dueDate).toLocaleDateString()}</span></div>` : ""}
             ${transaction.change > 0 ? `<div class="summary-row"><span>Change:</span><span>${formatPKRWithDecimals(transaction.change)}</span></div>` : ""}
           </div>
           <div style="text-align:center;margin-top:12px;border-top:1px dashed #888;padding-top:8px;font-size:11px;color:#666;">
@@ -219,7 +222,13 @@ export default function POSPage() {
   const calculateChange = () => {
     const received = Number.parseFloat(amountReceived || "0")
     const total = calculateTotal()
-    return received - total
+    return Math.max(0, received - total)
+  }
+
+  const calculateOutstanding = () => {
+    const received = Number.parseFloat(amountReceived || "0")
+    const total = calculateTotal()
+    return Math.max(0, total - received)
   }
 
   const handleCheckout = () => {
@@ -233,7 +242,9 @@ export default function POSPage() {
     const taxAmount = calculateTax()
     const totalAmount = calculateTotal()
     const received = Number.parseFloat(amountReceived || "0")
+    const outstandingAmount = calculateOutstanding()
     const change = calculateChange()
+    const paymentMethodLabel = paymentMethod === "cash" ? "Cash" : "Card"
 
     const transaction: POSTransaction = {
       id: Date.now().toString(),
@@ -243,9 +254,12 @@ export default function POSPage() {
       items: cart,
       subtotal,
       taxAmount,
+      discount: 0,
       totalAmount,
-      paymentMethod,
+      paymentMethod: paymentMethodLabel,
       amountReceived: received,
+      outstandingAmount,
+      dueDate: outstandingAmount > 0 ? dueDate || undefined : undefined,
       change,
       createdBy: user.id,
       createdAt: new Date().toISOString(),
@@ -256,7 +270,7 @@ export default function POSPage() {
       const customer = customers.find((c) => c.id === selectedCustomerId)
       if (customer) {
         storage.updateCustomer(selectedCustomerId, {
-          outstandingBalance: (customer.outstandingBalance || 0) + totalAmount,
+          outstandingBalance: (customer.outstandingBalance || 0) + outstandingAmount,
           totalPurchases: (customer.totalPurchases || 0) + 1,
         })
       }
@@ -306,6 +320,7 @@ export default function POSPage() {
     setCustomerName("")
     setSelectedCustomerId("")
     setAmountReceived("")
+    setDueDate("")
     setPaymentMethod("cash")
     setShowReceipt(false)
     setLastTransaction(null)
@@ -405,9 +420,21 @@ export default function POSPage() {
                       <span>{formatPKRWithDecimals(lastTransaction.totalAmount)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Payment ({lastTransaction.paymentMethod}):</span>
+                      <span>Paid ({lastTransaction.paymentMethod}):</span>
                       <span>{formatPKRWithDecimals(lastTransaction.amountReceived)}</span>
                     </div>
+                    {lastTransaction.outstandingAmount > 0 && (
+                      <div className="flex justify-between font-semibold">
+                        <span>Outstanding:</span>
+                        <span>{formatPKRWithDecimals(lastTransaction.outstandingAmount)}</span>
+                      </div>
+                    )}
+                    {lastTransaction.dueDate && (
+                      <div className="flex justify-between">
+                        <span>Due Date:</span>
+                        <span>{new Date(lastTransaction.dueDate).toLocaleDateString()}</span>
+                      </div>
+                    )}
                     {lastTransaction.change > 0 && (
                       <div className="flex justify-between font-semibold">
                         <span>Change:</span>
@@ -636,11 +663,19 @@ export default function POSPage() {
                       </div>
                       {Number.parseFloat(amountReceived) > 0 && (
                         <div className="flex justify-between font-semibold">
-                          <span>Change:</span>
-                          <span className={calculateChange() < 0 ? "text-destructive" : "text-green-600"}>
-                            {formatPKRWithDecimals(Math.abs(calculateChange()))}
-                            {calculateChange() < 0 && " (Insufficient)"}
+                          <span>{calculateOutstanding() > 0 ? "Remaining:" : "Change:"}</span>
+                          <span className={calculateOutstanding() > 0 ? "text-destructive" : "text-green-600"}>
+                            {formatPKRWithDecimals(
+                              calculateOutstanding() > 0 ? calculateOutstanding() : calculateChange(),
+                            )}
+                            {calculateOutstanding() > 0 && " (Due)"}
                           </span>
+                        </div>
+                      )}
+                      {calculateOutstanding() > 0 && (
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Due Date</Label>
+                          <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
                         </div>
                       )}
                     </div>
@@ -653,7 +688,7 @@ export default function POSPage() {
               <Button
                 className="w-full h-12 text-base font-semibold gap-2"
                 onClick={handleCheckout}
-                disabled={cart.length === 0 || calculateChange() < 0}
+                disabled={cart.length === 0}
               >
                 <Printer className="w-5 h-5" />
                 Complete Sale & Print Receipt
