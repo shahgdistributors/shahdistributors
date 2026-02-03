@@ -33,8 +33,8 @@ export default function LandingPage() {
   return (
     <div className="bg-slate-950 text-white overflow-hidden">
       {/* Header */}
-      <header className="fixed top-0 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-50">
-        <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="fixed top-0 w-full h-32 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-50">
+        <nav className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
               src={LOGO_SRC}
@@ -63,7 +63,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen pt-24 px-6 flex items-center overflow-hidden">
+      <section className="relative min-h-screen pt-32 px-6 flex items-center overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 overflow-hidden">
           <div

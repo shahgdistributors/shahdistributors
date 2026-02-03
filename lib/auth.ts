@@ -25,17 +25,20 @@ const supabaseSignIn = async (email: string, password: string): Promise<LoginRes
 }
 
 export async function login(username: string, password: string): Promise<LoginResult> {
-  if (username.includes("@")) {
-    return supabaseSignIn(username, password)
+  const normalizedUsername = username.trim()
+  const normalizedEmail = normalizedUsername.toLowerCase()
+
+  if (normalizedEmail.includes("@")) {
+    return supabaseSignIn(normalizedEmail, password)
   }
 
-  const user = storage.getUserByUsername(username)
+  const user = storage.getUserByUsername(normalizedUsername)
   if (user && user.password === password) {
     storage.setCurrentUser(user)
     return { success: true }
   }
 
-  return { success: false, error: "Invalid username or password" }
+  return { success: false, error: "Please sign in using your email address." }
 }
 
 export function logout(): void {

@@ -44,7 +44,30 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const result = await login(username, password)
+      const trimmedUsername = username.trim()
+      if (trimmedUsername.includes("@")) {
+        try {
+          const seedResponse = await fetch("/api/auth/seed-admin", { method: "POST" })
+          if (!seedResponse.ok) {
+            const payload = await seedResponse.json().catch(() => null)
+            setError(payload?.error || "Unable to verify admin account.")
+            setLoading(false)
+            return
+          }
+          const payload = await seedResponse.json().catch(() => null)
+          if (payload?.ok === false) {
+            setError(payload?.error || "Unable to verify admin account.")
+            setLoading(false)
+            return
+          }
+        } catch {
+          setError("Unable to verify admin account.")
+          setLoading(false)
+          return
+        }
+      }
+
+      const result = await login(trimmedUsername, password)
 
       if (result.success) {
         router.push("/dashboard")
