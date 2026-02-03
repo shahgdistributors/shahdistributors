@@ -88,6 +88,8 @@ export interface POSTransaction {
   taxAmount: number
   discount: number
   totalAmount: number
+  previousOutstanding: number
+  totalDue: number
   paymentMethod: "Cash" | "Card" | "UPI" | "Other"
   amountReceived: number
   outstandingAmount: number

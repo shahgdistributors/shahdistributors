@@ -122,8 +122,9 @@ export default function POSPage() {
           </table>
           <div class="summary">
             <div class="summary-row"><span>Subtotal:</span><span>${formatPKRWithDecimals(transaction.subtotal)}</span></div>
-            <div class="summary-row"><span>Tax (18% GST):</span><span>${formatPKRWithDecimals(transaction.taxAmount)}</span></div>
-            <div class="summary-row total"><span>Total:</span><span>${formatPKRWithDecimals(transaction.totalAmount)}</span></div>
+            <div class="summary-row"><span>Tax (0.5% GST):</span><span>${formatPKRWithDecimals(transaction.taxAmount)}</span></div>
+            ${transaction.previousOutstanding > 0 ? `<div class="summary-row"><span>Previous Outstanding:</span><span>${formatPKRWithDecimals(transaction.previousOutstanding)}</span></div>` : ""}
+            <div class="summary-row total"><span>Total Due:</span><span>${formatPKRWithDecimals(transaction.totalDue)}</span></div>
             <div class="summary-row"><span>Paid (${transaction.paymentMethod}):</span><span>${formatPKRWithDecimals(transaction.amountReceived)}</span></div>
             ${transaction.outstandingAmount > 0 ? `<div class="summary-row"><span>Outstanding:</span><span>${formatPKRWithDecimals(transaction.outstandingAmount)}</span></div>` : ""}
             ${transaction.dueDate ? `<div class="summary-row"><span>Due Date:</span><span>${new Date(transaction.dueDate).toLocaleDateString()}</span></div>` : ""}
@@ -212,23 +213,33 @@ export default function POSPage() {
   }
 
   const calculateTax = () => {
-    return calculateSubtotal() * 0.18
+    return calculateSubtotal() * 0.005
+  }
+
+  const getPreviousOutstanding = () => {
+    if (!selectedCustomerId) return 0
+    const customer = customers.find((c) => c.id === selectedCustomerId)
+    return customer?.outstandingBalance || 0
   }
 
   const calculateTotal = () => {
     return calculateSubtotal() + calculateTax()
   }
 
+  const calculateTotalDue = () => {
+    return calculateTotal() + getPreviousOutstanding()
+  }
+
   const calculateChange = () => {
     const received = Number.parseFloat(amountReceived || "0")
-    const total = calculateTotal()
-    return Math.max(0, received - total)
+    const totalDue = calculateTotalDue()
+    return Math.max(0, received - totalDue)
   }
 
   const calculateOutstanding = () => {
     const received = Number.parseFloat(amountReceived || "0")
-    const total = calculateTotal()
-    return Math.max(0, total - received)
+    const totalDue = calculateTotalDue()
+    return Math.max(0, totalDue - received)
   }
 
   const handleCheckout = () => {
@@ -241,6 +252,8 @@ export default function POSPage() {
     const subtotal = calculateSubtotal()
     const taxAmount = calculateTax()
     const totalAmount = calculateTotal()
+    const previousOutstanding = getPreviousOutstanding()
+    const totalDue = calculateTotalDue()
     const received = Number.parseFloat(amountReceived || "0")
     const outstandingAmount = calculateOutstanding()
     const change = calculateChange()
@@ -256,6 +269,8 @@ export default function POSPage() {
       taxAmount,
       discount: 0,
       totalAmount,
+      previousOutstanding,
+      totalDue,
       paymentMethod: paymentMethodLabel,
       amountReceived: received,
       outstandingAmount,
@@ -270,7 +285,7 @@ export default function POSPage() {
       const customer = customers.find((c) => c.id === selectedCustomerId)
       if (customer) {
         storage.updateCustomer(selectedCustomerId, {
-          outstandingBalance: (customer.outstandingBalance || 0) + outstandingAmount,
+          outstandingBalance: outstandingAmount,
           totalPurchases: (customer.totalPurchases || 0) + 1,
         })
       }
@@ -412,12 +427,18 @@ export default function POSPage() {
                       <span>{formatPKRWithDecimals(lastTransaction.subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Tax (18% GST):</span>
+                      <span>Tax (0.5% GST):</span>
                       <span>{formatPKRWithDecimals(lastTransaction.taxAmount)}</span>
                     </div>
+                    {lastTransaction.previousOutstanding > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span>Previous Outstanding:</span>
+                        <span>{formatPKRWithDecimals(lastTransaction.previousOutstanding)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-lg font-bold border-t border-gray-400 pt-2">
-                      <span>Total:</span>
-                      <span>{formatPKRWithDecimals(lastTransaction.totalAmount)}</span>
+                      <span>Total Due:</span>
+                      <span>{formatPKRWithDecimals(lastTransaction.totalDue)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Paid ({lastTransaction.paymentMethod}):</span>
@@ -654,12 +675,18 @@ export default function POSPage() {
                         <span>{formatPKRWithDecimals(calculateSubtotal())}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>Tax (18%):</span>
+                        <span>Tax (0.5%):</span>
                         <span>{formatPKRWithDecimals(calculateTax())}</span>
                       </div>
+                      {getPreviousOutstanding() > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span>Previous Outstanding:</span>
+                          <span>{formatPKRWithDecimals(getPreviousOutstanding())}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between text-lg font-bold">
-                        <span>Total:</span>
-                        <span>{formatPKRWithDecimals(calculateTotal())}</span>
+                        <span>Total Due:</span>
+                        <span>{formatPKRWithDecimals(calculateTotalDue())}</span>
                       </div>
                       {Number.parseFloat(amountReceived) > 0 && (
                         <div className="flex justify-between font-semibold">
