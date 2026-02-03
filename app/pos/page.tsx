@@ -474,20 +474,20 @@ export default function POSPage() {
               </div>
             </div>
 
-            <ScrollArea className="h-[60vh]">
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+            <ScrollArea className="h-[60vh] md:h-[70vh]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filteredProducts.map((product) => (
                   <Card
                     key={product.id}
-                    className="cursor-pointer hover:border-primary transition-colors"
+                    className="cursor-pointer border-border/60 bg-card/80 shadow-sm transition hover:border-primary hover:shadow-md"
                     onClick={() => addToCart(product)}
                   >
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold text-sm mb-1 line-clamp-1">{product.name}</h3>
-                      <p className="text-xs text-muted-foreground mb-2">{product.category}</p>
+                    <CardContent className="p-4 sm:p-5">
+                      <h3 className="font-semibold text-base mb-1 line-clamp-2">{product.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-3">{product.category}</p>
                       <div className="flex justify-between items-center">
-                        <span className="font-bold text-primary">{formatPKR(product.price)}</span>
-                        <span className="text-xs text-muted-foreground">Stock: {product.stock}</span>
+                        <span className="font-bold text-primary text-base">{formatPKR(product.price)}</span>
+                        <span className="text-sm text-muted-foreground">Stock: {product.stock}</span>
                       </div>
                     </CardContent>
                   </Card>
